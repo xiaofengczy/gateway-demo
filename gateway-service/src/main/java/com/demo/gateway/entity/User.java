@@ -1,6 +1,8 @@
 package com.demo.gateway.entity;
 
 import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * FileName: User Description:
@@ -9,9 +11,11 @@ import lombok.Data;
  * @create 2019/12/12
  */
 @Data
+@Document
 public class User {
 
-  private Integer id;
+  @Id
+  private String id;
 
   private String userName;
 

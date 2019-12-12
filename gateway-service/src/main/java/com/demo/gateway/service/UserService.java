@@ -1,6 +1,7 @@
 package com.demo.gateway.service;
 
 import com.demo.gateway.entity.User;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -11,6 +12,13 @@ import reactor.core.publisher.Mono;
  */
 public interface UserService {
 
-  Mono<Integer> saveUser(User user);
+  Mono<String> saveUser(User user);
 
+  Mono<Void> deleteUser(String userId);
+
+  Mono<User> updateUser(User user);
+
+  Mono<User> queryById(String userId);
+
+  Flux<User> queryAll();
 }

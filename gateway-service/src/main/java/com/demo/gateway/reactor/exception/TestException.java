@@ -1,6 +1,6 @@
 package com.demo.gateway.reactor.exception;
 
-import com.yunsom.common.base.exception.BusinessException;
+import lombok.Data;
 
 /**
  * FileName: TestException Description:
@@ -8,9 +8,20 @@ import com.yunsom.common.base.exception.BusinessException;
  * @author caozhongyu
  * @create 2019/12/12
  */
-public class TestException extends BusinessException {
+@Data
+public class TestException extends Exception {
+
+  private String msg;
+
+  private String code;
 
   public TestException(String msg,Throwable t){
     super(msg);
   }
+
+  public TestException(String msg,String code){
+    this.msg = msg;
+    this.code = code;
+  }
+
 }

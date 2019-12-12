@@ -5,10 +5,10 @@ spring:
     host: 192.168.1.230
     database: 1
   profiles:
-    active: rate-config
+    active: basic_config
   data:
     mongodb:
-      uri: mongodb://study:123456@localhost:27017/study
+      uri: mongodb://admin:123456@148.70.30.245:27017/admin
 
 ---
 # 基础配置
