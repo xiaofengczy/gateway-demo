@@ -9,6 +9,10 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cloud.function.json.JsonMapper;
+import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,6 +36,12 @@ public class WebFluxController {
   @Resource
   private UserService userService;
   private Logger logger = LoggerFactory.getLogger(WebFluxController.class);
+
+  @Resource
+  private ReactiveRedisTemplate<String,String> reactiveRedisTemplate;
+
+  @Resource
+  private JsonMapper jsonMapper;
 
   @GetMapping("/test1")
   public String test1() {
@@ -92,6 +102,29 @@ public class WebFluxController {
     return userService.queryAll().flatMap(r -> toSuccess(r));
   }
 
+
+  @PostMapping("/save/redis")
+  public Mono<Result> saveRedis(@RequestBody User user) {
+    //参数校验
+    return validateParam(user)
+        .switchIfEmpty(saveUserToRedis(user))
+        .flatMap(r -> toSuccess(r))
+        .onErrorResume(e -> toFail(e));
+  }
+
+  @GetMapping("/find/redis")
+  public Mono<Result> findRedisById(@RequestParam String userId) {
+    //参数校验
+    Mono<String> result = reactiveRedisTemplate.opsForValue().get("user:" + userId);
+    return result.map(r -> jsonMapper.toObject(r, User.class)).flatMap(u -> toSuccess(u));
+  }
+
+  private Mono saveUserToRedis(User user) {
+    return reactiveRedisTemplate.opsForValue()
+        .set("user:" + user.getId(), jsonMapper.toString(user));
+  }
+
+
   private Mono validateParam(User user) {
     if (Objects.isNull(user.getUserName())) {
       return Mono.error(new TestException("用户名不能为空", "1001"));
@@ -114,7 +147,6 @@ public class WebFluxController {
     Result result = new Result();
     result.setCode("1001");
     result.setMessage("fail");
-    result.setData(t);
     return Mono.just(result);
   }
 
