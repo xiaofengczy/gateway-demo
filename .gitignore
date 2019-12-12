@@ -1,0 +1,4 @@
+# Project exclude paths
+/gateway-provider/target/
+/gateway-service/target/
+/zuul-service/target/

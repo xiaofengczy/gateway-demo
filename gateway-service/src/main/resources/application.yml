@@ -1,0 +1,113 @@
+server:
+  port: 7777
+spring:
+  redis:
+    host: 192.168.1.230
+    database: 1
+  profiles:
+    active: rate-config
+  data:
+    mongodb:
+      uri: mongodb://study:123456@localhost:27017/study
+
+---
+# 基础配置
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: provider
+          uri: lb://provider-service
+          predicates:
+            - Path=/queryUser
+          filters:
+            - AddRequestHeader=context-user, {"userId":"1001"}
+  profiles: basic_config
+
+---
+# path
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: provider
+          uri: lb://provider-service
+          # ip:port
+#          uri: http://localhost:6667
+          # 域名
+#          uri: http://admin.scm3.yunsom.space
+          predicates:
+            - Path=/provider/queryUser
+          filters:
+            - StripPrefix=1
+  profiles: path
+
+---
+# host
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: provider
+          uri: lb://provider-service
+          predicates:
+            - Host=admin.scm3.yunsom.space
+          filters:
+#            - StripPrefix=1
+            - AddRequestParameter=name,tom
+#            - name: Hystrix
+#              args:
+#                name: fallbackcmd
+#                fallbackUri: forward:/fallback
+            - PrefixPath=/mm
+
+#hystrix:
+#  command:
+#    fallbackcmd:
+#      execution:
+#        isolation:
+#          thread:
+#            timeoutInMilliseconds: 5000
+
+  profiles: host-config
+
+
+---
+# filter
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: provider
+          uri: lb://provider-service
+          predicates:
+            - Path=/provider/queryUser
+          filters:
+            - StripPrefix=1
+            - name: Custom
+              args:
+                enabled: true
+
+  profiles: filter-config
+
+---
+# rateLimiter
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: provider
+          uri: lb://provider-service
+          predicates:
+            - Path=/provider/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                key-resolver: "#{@uriKeyResolver}"
+                # 允许用户每秒处理多少个请求
+                redis-rate-limiter.replenishRate: 1
+                # 令牌桶容量，允许在一秒钟内完成的最大请求数
+                redis-rate-limiter.burstCapacity: 5
+
+  profiles: rate-config
+

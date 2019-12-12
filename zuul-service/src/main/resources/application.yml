@@ -1,0 +1,8 @@
+server:
+  port: 8888
+
+zuul:
+  routes:
+    provider:
+      path: /queryUser
+      serviceId: provider-service
