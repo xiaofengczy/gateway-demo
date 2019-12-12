@@ -14,7 +14,7 @@ public interface UserService {
 
   Mono<String> saveUser(User user);
 
-  Mono<Void> deleteUser(String userId);
+  Mono<Boolean> deleteUser(String userId);
 
   Mono<User> updateUser(User user);
 

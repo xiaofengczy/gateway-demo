@@ -30,8 +30,9 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public Mono<Void> deleteUser(String userId) {
-    return userDao.deleteById(userId);
+  public Mono<Boolean> deleteUser(String userId) {
+    return userDao.findById(userId).flatMap(user -> userDao.deleteById(userId).then(Mono.just(true)))
+        .defaultIfEmpty(false);
   }
 
   @Override

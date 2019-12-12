@@ -5,7 +5,11 @@ import com.demo.gateway.reactor.exception.TestException;
 import com.demo.gateway.service.UserService;
 import com.demo.gateway.utils.Result;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +32,32 @@ public class WebFluxController {
 
   @Resource
   private UserService userService;
+  private Logger logger = LoggerFactory.getLogger(WebFluxController.class);
+
+  @GetMapping("/test1")
+  public String test1() {
+    logger.info("test1");
+    String result = getStr();
+    logger.info("test1");
+    return result;
+  }
+
+  @GetMapping("/test2")
+  public Mono<String> test2() {
+    logger.info("test2");
+    Mono<String> result = Mono.fromSupplier(() -> getStr());
+    logger.info("test2");
+    return result;
+  }
+
+  private String getStr() {
+    try {
+      TimeUnit.SECONDS.sleep(5);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    return "hello webflux";
+  }
 
   @PostMapping("/save")
   public Mono<Result> save(@RequestBody User user) {
@@ -39,23 +69,28 @@ public class WebFluxController {
   }
 
   @DeleteMapping("/delete")
-  public Mono<Void> delete(@RequestParam String userId) {
-     return userService.deleteUser(userId);
+  public Mono<Result> delete(@RequestParam String userId) {
+    return userService.deleteUser(userId).flatMap(r -> {
+      if (!r) {
+        return toFail(r);
+      }
+      return toSuccess(r);
+    });
   }
 
   @PutMapping("/update")
   public Mono<Result> update(@RequestBody User user) {
-    return userService.updateUser(user).flatMap(r->toSuccess(r));
+    return userService.updateUser(user).flatMap(r -> toSuccess(r));
   }
 
   @GetMapping("/find/{id}")
   public Mono<Result> queryById(@PathVariable String id) {
-    return userService.queryById(id).flatMap(r->toSuccess(r));
+    return userService.queryById(id).flatMap(r -> toSuccess(r));
   }
 
   @GetMapping("/find/all")
   public Flux<Result> queryAll() {
-    return userService.queryAll().flatMap(r->toSuccess(r));
+    return userService.queryAll().flatMap(r -> toSuccess(r));
   }
 
   private Mono validateParam(User user) {
@@ -77,10 +112,10 @@ public class WebFluxController {
   }
 
   public Mono<Result> toFail(Object t) {
-    TestException exception = (TestException) t;
     Result result = new Result();
-    result.setCode(exception.getCode());
-    result.setMessage(exception.getMsg());
+    result.setCode("1001");
+    result.setMessage("fail");
+    result.setData(t);
     return Mono.just(result);
   }
 
