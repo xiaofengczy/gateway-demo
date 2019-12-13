@@ -28,7 +28,7 @@ public class WebClientController {
     return httpservice.queryById(id).flatMap(r -> toSuccess(r));
   }
 
-  @PostMapping("/save")
+  @PostMapping("/http/save")
   public Mono<Result> save(@RequestBody User user) {
     return httpservice.saveUser(user).flatMap(r -> toSuccess(r));
   }
