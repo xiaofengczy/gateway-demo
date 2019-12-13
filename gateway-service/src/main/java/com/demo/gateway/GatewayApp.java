@@ -4,12 +4,10 @@ import com.demo.gateway.filter.UriKeyResolver;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
-import org.springframework.data.redis.core.ReactiveRedisTemplate;
-import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
-import org.springframework.data.redis.serializer.RedisSerializationContext;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * @author caozhongyu
@@ -28,6 +26,12 @@ public class GatewayApp {
   @Bean
   KeyResolver uriKeyResolver(){
     return new UriKeyResolver();
+  }
+
+  @Bean
+  @LoadBalanced
+  public WebClient.Builder webClientBuilder() {
+    return WebClient.builder();
   }
 
 }
