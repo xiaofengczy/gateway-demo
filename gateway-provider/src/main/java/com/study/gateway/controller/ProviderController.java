@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ProviderController {
 
-  @GetMapping("/provider/queryUser")
+  @GetMapping("/queryUser")
+//  @GetMapping("/provider/queryUser")
   public String queryUser(HttpServletRequest request) {
     String header = request.getHeader("context-user");
     String name = request.getParameter("name");
